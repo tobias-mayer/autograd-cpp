@@ -5,6 +5,8 @@
 #include <ostream>
 #include <vector>
 
+namespace autograd {
+
 using std::make_shared;
 using std::ostream;
 using std::shared_ptr;
@@ -37,7 +39,7 @@ public:
     void set_grad(double grad) { _grad = grad; }
 
     friend ostream& operator<<(ostream& os, const Scalar& scalar) {
-        os << "Scalar(data=" << scalar._data << ", grad=" << scalar.grad << ")";
+        os << "Scalar(data=" << scalar._data << ", grad=" << scalar._grad << ")";
         return os;
     }
 };
@@ -61,7 +63,15 @@ inline ScalarPtr operator*(ScalarPtr lhs, ScalarPtr rhs) {
 }
 
 inline ScalarPtr operator-(ScalarPtr lhs, ScalarPtr rhs) {
-    return lhs + (-rhs);
+    auto out = make_shared<Scalar>(
+        lhs->data() - rhs->data(),
+        vector<ScalarPtr>{lhs, rhs}
+    );
+
+    return out;
 }
+
+};
+
 
 
