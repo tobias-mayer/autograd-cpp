@@ -41,3 +41,27 @@ public:
         return os;
     }
 };
+
+inline ScalarPtr operator+(ScalarPtr lhs, ScalarPtr rhs) {
+    auto out = make_shared<Scalar>(
+        lhs->data() + rhs->data(),
+        vector<ScalarPtr>{lhs, rhs}
+    );
+
+    return out;
+}
+
+inline ScalarPtr operator*(ScalarPtr lhs, ScalarPtr rhs) {
+    auto out = make_shared<Scalar>(
+        lhs->data() * rhs->data(),
+        vector<ScalarPtr>{lhs, rhs}
+    );
+
+    return out;
+}
+
+inline ScalarPtr operator-(ScalarPtr lhs, ScalarPtr rhs) {
+    return lhs + (-rhs);
+}
+
+
