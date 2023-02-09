@@ -38,6 +38,15 @@ public:
     const vector<ScalarPtr>& children() const { return _children; }
     void set_grad(double grad) { _grad = grad; }
 
+    ValuePtr pow(ValuePtr rhs) {
+        auto out = make_shared<Scalar>(
+            std::pow(_data, rhs->_data),
+            vector<ValuePtr>(shared_from_this())
+        );
+
+        return out;
+    }
+
     friend ostream& operator<<(ostream& os, const Scalar& scalar) {
         os << "Scalar(data=" << scalar._data << ", grad=" << scalar._grad << ")";
         return os;
@@ -53,15 +62,6 @@ inline ScalarPtr operator+(ScalarPtr lhs, ScalarPtr rhs) {
     return out;
 }
 
-inline ScalarPtr operator*(ScalarPtr lhs, ScalarPtr rhs) {
-    auto out = make_shared<Scalar>(
-        lhs->data() * rhs->data(),
-        vector<ScalarPtr>{lhs, rhs}
-    );
-
-    return out;
-}
-
 inline ScalarPtr operator-(ScalarPtr lhs, ScalarPtr rhs) {
     auto out = make_shared<Scalar>(
         lhs->data() - rhs->data(),
@@ -71,7 +71,18 @@ inline ScalarPtr operator-(ScalarPtr lhs, ScalarPtr rhs) {
     return out;
 }
 
+inline ScalarPtr operator*(ScalarPtr lhs, ScalarPtr rhs) {
+    auto out = make_shared<Scalar>(
+        lhs->data() * rhs->data(),
+        vector<ScalarPtr>{lhs, rhs}
+    );
+
+    return out;
+}
+
+inline ScalarPtr operator/(ScalarPtr lhs, ScalarPtr rhs) {
+    return lhs * rhs->pow(make_shared<Scalar>(-1));
+}
+
 };
-
-
 
