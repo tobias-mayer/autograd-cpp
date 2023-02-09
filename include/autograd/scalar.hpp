@@ -38,10 +38,10 @@ public:
     const vector<ScalarPtr>& children() const { return _children; }
     void set_grad(double grad) { _grad = grad; }
 
-    ValuePtr pow(ValuePtr rhs) {
+    ScalarPtr pow(ScalarPtr rhs) {
         auto out = make_shared<Scalar>(
             std::pow(_data, rhs->_data),
-            vector<ValuePtr>(shared_from_this())
+            vector<ScalarPtr>{ shared_from_this() }
         );
 
         return out;
