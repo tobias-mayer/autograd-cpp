@@ -8,6 +8,7 @@
 #include <ostream>
 #include <vector>
 #include <unordered_set>
+#include <queue>
 
 namespace autograd {
 
@@ -52,23 +53,26 @@ public:
 
     void backward() {
         _grad = 1.0;
-        vector<ScalarPtr> topologicalOrder;
+
+        std::queue<ScalarPtr> queue;
+        queue.push(shared_from_this());
+
         std::unordered_set<ScalarPtr> visited;
-        build_topo(shared_from_this(), topologicalOrder, visited);
-        for (auto scalar : topologicalOrder) {
+
+        while (!queue.empty()) {
+            auto scalar = queue.front();
+            queue.pop();
+
             scalar->_backward();
-        }
-    }
+            visited.insert(scalar);
 
-    void build_topo(ScalarPtr scalar, vector<ScalarPtr>& topologicalOrder, std::unordered_set<ScalarPtr>& visited) {
-        if (visited.find(scalar) != visited.end()) return;
+            for (auto child : scalar->children()) {
+                if (visited.find(child) != visited.end()) continue;
 
-        visited.insert(scalar);
-        for (auto child : scalar->children()) {
-            build_topo(child, topologicalOrder, visited);
+                queue.push(child);
+            }
         }
 
-        topologicalOrder.insert(topologicalOrder.begin(), scalar);
     }
 
     friend ostream& operator<<(ostream& os, const Scalar& scalar) {
