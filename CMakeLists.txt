@@ -11,3 +11,4 @@ add_library(autograd INTERFACE)
 target_include_directories(autograd INTERFACE include)
 
 add_subdirectory(tests)
+add_subdirectory(examples)

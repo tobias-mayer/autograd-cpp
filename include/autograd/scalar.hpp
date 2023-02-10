@@ -96,17 +96,7 @@ inline ScalarPtr operator+(ScalarPtr lhs, ScalarPtr rhs) {
 }
 
 inline ScalarPtr operator-(ScalarPtr lhs, ScalarPtr rhs) {
-    auto out = make_shared<Scalar>(
-        lhs->data() - rhs->data(),
-        vector<ScalarPtr>{lhs, rhs}
-    );
-
-    out->_backward = [out, lhs, rhs] {
-        lhs->set_grad(lhs->grad() + out->grad());
-        rhs->set_grad(rhs->grad() + out->grad());
-    };
-
-    return out;
+    return lhs + (-rhs);
 }
 
 inline ScalarPtr operator*(ScalarPtr lhs, ScalarPtr rhs) {
