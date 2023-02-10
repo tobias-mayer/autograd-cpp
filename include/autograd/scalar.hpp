@@ -1,9 +1,13 @@
+#ifndef __AUTOGRAD_SCALAR_HPP__
+#define __AUTOGRAD_SCALAR_HPP__
+
 #include <algorithm>
 #include <cmath>
 #include <functional>
 #include <memory>
 #include <ostream>
 #include <vector>
+#include <unordered_set>
 
 namespace autograd {
 
@@ -20,7 +24,6 @@ private:
     float _data;
     double _grad;
     vector<ScalarPtr> _children;
-    std::function<void()> _backward;
 
 public:
     Scalar(double data) : _data(data), _grad(0.0f), _backward{[]() {}} { }
@@ -31,7 +34,7 @@ public:
           _children{children},
           _backward{[]() {}} { }
 
-
+    std::function<void()> _backward;
     double data() const { return _data; }
     void set_data(double data) { _data = data; }
     double grad() const { return _grad; }
@@ -47,6 +50,27 @@ public:
         return out;
     }
 
+    void backward() {
+        _grad = 1.0;
+        vector<ScalarPtr> topologicalOrder;
+        std::unordered_set<ScalarPtr> visited;
+        build_topo(shared_from_this(), topologicalOrder, visited);
+        for (auto scalar : topologicalOrder) {
+            scalar->_backward();
+        }
+    }
+
+    void build_topo(ScalarPtr scalar, vector<ScalarPtr>& topologicalOrder, std::unordered_set<ScalarPtr>& visited) {
+        if (visited.find(scalar) != visited.end()) return;
+
+        visited.insert(scalar);
+        for (auto child : scalar->children()) {
+            build_topo(child, topologicalOrder, visited);
+        }
+
+        topologicalOrder.insert(topologicalOrder.begin(), scalar);
+    }
+
     friend ostream& operator<<(ostream& os, const Scalar& scalar) {
         os << "Scalar(data=" << scalar._data << ", grad=" << scalar._grad << ")";
         return os;
@@ -59,6 +83,11 @@ inline ScalarPtr operator+(ScalarPtr lhs, ScalarPtr rhs) {
         vector<ScalarPtr>{lhs, rhs}
     );
 
+    out->_backward = [out, lhs, rhs]() {
+        lhs->set_grad(lhs->grad() + out->grad());
+        rhs->set_grad(rhs->grad() + out->grad());
+    };
+
     return out;
 }
 
@@ -67,6 +96,11 @@ inline ScalarPtr operator-(ScalarPtr lhs, ScalarPtr rhs) {
         lhs->data() - rhs->data(),
         vector<ScalarPtr>{lhs, rhs}
     );
+
+    out->_backward = [out, lhs, rhs] {
+        lhs->set_grad(lhs->grad() + out->grad());
+        rhs->set_grad(rhs->grad() + out->grad());
+    };
 
     return out;
 }
@@ -77,6 +111,11 @@ inline ScalarPtr operator*(ScalarPtr lhs, ScalarPtr rhs) {
         vector<ScalarPtr>{lhs, rhs}
     );
 
+    out->_backward = [out, lhs, rhs] {
+        lhs->set_grad(lhs->grad() + rhs->data() * out->grad());
+        rhs->set_grad(rhs->grad() + lhs->data() * out->grad());
+    };
+
     return out;
 }
 
@@ -86,3 +125,4 @@ inline ScalarPtr operator/(ScalarPtr lhs, ScalarPtr rhs) {
 
 };
 
+#endif

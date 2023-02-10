@@ -65,6 +65,45 @@ TEST(ScalarTest, NestingOperations) {
     ASSERT_TRUE(c->children()[1]->children().empty()); // const value does not have any children
 }
 
+TEST(GradTest, Add) {
+    auto a = make_shared<Scalar>(-3.0);
+    auto b = make_shared<Scalar>(2.0);
+    auto c = a + b;
+    c->backward();
+    EXPECT_EQ(a->grad(), 1.0);
+    EXPECT_EQ(b->grad(), 1.0);
+    EXPECT_EQ(c->grad(), 1.0);
+}
+
+TEST(GradTest, Mul) {
+    auto a = make_shared<Scalar>(2.0);
+    auto b = make_shared<Scalar>(6.0);
+    auto c = a * b;
+    c->backward();
+    EXPECT_EQ(a->grad(), 6.0);
+    EXPECT_EQ(b->grad(), 2.0);
+    EXPECT_EQ(c->grad(), 1.0);
+}
+
+TEST(GradTest, Mul2) {
+    auto a = make_shared<Scalar>(4.0);
+    auto c = a * a * a;
+    c->backward();
+    EXPECT_EQ(a->grad(), 48.0);
+    EXPECT_EQ(c->grad(), 1.0);
+}
+
+TEST(GradTest, MultiUse) {
+    auto a = make_shared<Scalar>(-4.0);
+    auto b = make_shared<Scalar>(2.0);
+    auto c = a * b;
+    c = c * b;
+    c->backward();
+    EXPECT_EQ(a->grad(), 4.0);
+    EXPECT_EQ(b->grad(), -16.0);
+    EXPECT_EQ(c->grad(), 1.0);
+}
+
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
