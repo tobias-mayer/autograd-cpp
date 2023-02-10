@@ -95,8 +95,9 @@ inline ScalarPtr operator+(ScalarPtr lhs, ScalarPtr rhs) {
     return out;
 }
 
-inline ScalarPtr operator-(ScalarPtr lhs, ScalarPtr rhs) {
-    return lhs + (-rhs);
+inline ScalarPtr operator+(ScalarPtr lhs, double val) {
+    auto rhs = make_shared<Scalar>(val);
+    return lhs + rhs;
 }
 
 inline ScalarPtr operator*(ScalarPtr lhs, ScalarPtr rhs) {
@@ -113,8 +114,36 @@ inline ScalarPtr operator*(ScalarPtr lhs, ScalarPtr rhs) {
     return out;
 }
 
+inline ScalarPtr operator*(ScalarPtr lhs, double val) {
+    auto rhs = make_shared<Scalar>(val);
+    return lhs * rhs;
+}
+
+inline ScalarPtr operator*(double val, ScalarPtr rhs) {
+    auto lhs = make_shared<Scalar>(val);
+    return lhs * rhs;
+}
+
+inline ScalarPtr operator-(ScalarPtr rhs) {
+    return make_shared<Scalar>(-1.0) * rhs;
+}
+
+inline ScalarPtr operator-(ScalarPtr lhs, ScalarPtr rhs) {
+    return lhs + (-rhs);
+}
+
 inline ScalarPtr operator/(ScalarPtr lhs, ScalarPtr rhs) {
     return lhs * rhs->pow(make_shared<Scalar>(-1));
+}
+
+inline ScalarPtr operator/(ScalarPtr lhs, double val) {
+    auto rhs = make_shared<Scalar>(val);
+    return lhs / rhs;
+}
+
+inline ScalarPtr operator/(double val, ScalarPtr rhs) {
+    auto lhs = make_shared<Scalar>(val);
+    return lhs / rhs;
 }
 
 };
