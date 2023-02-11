@@ -51,6 +51,11 @@ public:
         return out;
     }
 
+    ScalarPtr pow(double exponent) {
+        auto exp = make_shared<Scalar>(exponent);
+        return pow(exp);
+    }
+
     void backward() {
         _grad = 1.0;
 

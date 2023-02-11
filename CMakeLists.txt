@@ -12,3 +12,4 @@ target_include_directories(autograd INTERFACE include)
 
 add_subdirectory(tests)
 add_subdirectory(examples)
+add_subdirectory(python_bindings)
